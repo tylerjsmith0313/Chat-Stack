@@ -1,0 +1,8 @@
+{
+  "name": "Flourish Chat & Command Center",
+  "description": "A high-performance chat ecosystem featuring a client-side lead capture widget and a robust operator command center with Gemini-powered smart replies.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
