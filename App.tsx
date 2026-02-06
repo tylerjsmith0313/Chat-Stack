@@ -15,7 +15,7 @@ const App: React.FC = () => {
   const config = getSupabaseConfig();
 
   useEffect(() => {
-    // Check if system is installed
+    // Check if system is installed locally
     const installed = localStorage.getItem('flourish_installed') === 'true';
     setIsInstalled(installed);
 
@@ -58,16 +58,15 @@ const App: React.FC = () => {
   };
 
   const generateEmbedCode = () => {
-    const domain = config?.bluehostDomain || 'your-bluehost-domain.com';
+    const domain = window.location.host;
     return `
 <!-- Flourish Chat Widget -->
 <script>
   (function(w,d,s,u) {
     var f=d.getElementsByTagName(s)[0],j=d.createElement(s);
     j.async=true; j.src=u; f.parentNode.insertBefore(j,f);
-  })(window,document,'script','https://${domain}/widget-loader.js');
+  })(window,document,'script','https://${domain}/widget.js');
 </script>
-<!-- Note: Ensure you upload your build to Bluehost public_html -->
     `.trim();
   };
 
@@ -79,7 +78,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden font-['Plus_Jakarta_Sans']">
-      {/* View Switcher */}
+      {/* Navigation Switcher */}
       <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex bg-white/80 backdrop-blur-md p-1 rounded-full shadow-lg border border-slate-200">
         <button
           onClick={() => setView('portal')}
@@ -95,7 +94,7 @@ const App: React.FC = () => {
             view === 'widget_demo' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'
           }`}
         >
-          Widget Demo
+          Widget Preview
         </button>
       </div>
 
@@ -106,52 +105,60 @@ const App: React.FC = () => {
           <Login onLogin={(name) => setOperator({ username: name, email: '', status: 'online' })} />
         )
       ) : (
-        <div className="flex flex-col md:flex-row h-screen bg-slate-900 overflow-hidden">
-          {/* Documentation / Snippet Section */}
+        <div className="flex flex-col md:flex-row h-screen bg-slate-950 overflow-hidden">
+          {/* Vercel Deployment Documentation */}
           <div className="flex-1 p-12 overflow-y-auto text-white flex flex-col justify-center">
             <div className="max-w-xl">
-              <h1 className="text-4xl font-black italic tracking-tighter mb-4">WIDGET DEMO</h1>
-              <p className="text-slate-400 font-medium mb-10 leading-relaxed">
-                This is how the widget appears to your visitors. It connects directly to your Supabase instance, meaning data is persistent and secure.
+              <h1 className="text-5xl font-black italic tracking-tighter mb-4 text-indigo-500">PREVIEW</h1>
+              <p className="text-slate-400 font-medium mb-10 leading-relaxed text-lg">
+                Your widget is currently communicating with <strong>{config?.supabaseUrl || 'Supabase'}</strong> via the Vercel edge.
               </p>
               
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-4">Installation Snippet</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-4">React/HTML Snippet</h3>
                   <div className="relative group">
-                    <pre className="bg-black/50 p-6 rounded-3xl border border-white/10 text-[10px] font-mono text-emerald-400 overflow-x-auto">
+                    <pre className="bg-black p-6 rounded-3xl border border-white/10 text-[10px] font-mono text-emerald-400 overflow-x-auto shadow-2xl">
                       {generateEmbedCode()}
                     </pre>
                     <button 
                       onClick={() => navigator.clipboard.writeText(generateEmbedCode())}
-                      className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase"
+                      className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase backdrop-blur-md"
                     >
-                      Copy Snippet
+                      Copy
                     </button>
                   </div>
                 </div>
 
-                <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Bluehost Deployment</h4>
-                  <p className="text-[10px] text-slate-500 leading-relaxed">
-                    1. Upload the <code>dist/</code> contents to <code>public_html</code> on Bluehost.<br/>
-                    2. Add the snippet above to your website's <code>&lt;head&gt;</code> or footer.<br/>
-                    3. The widget will automatically sync with your portal.
-                  </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Vercel Status</h4>
+                    <div className="flex items-center gap-2">
+                       <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                       <span className="text-xs font-bold uppercase">Production</span>
+                    </div>
+                  </div>
+                  <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Supabase Sync</h4>
+                    <div className="flex items-center gap-2">
+                       <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                       <span className="text-xs font-bold uppercase">Connected</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Live Preview Section */}
-          <div className="w-full md:w-[450px] bg-slate-800/50 flex items-center justify-center p-12 border-l border-white/5 relative">
-             <div className="text-center">
-                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
-                   <svg className="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-full md:w-[500px] bg-slate-900 flex items-center justify-center p-12 border-l border-white/5 relative">
+             <div className="text-center opacity-20 pointer-events-none select-none">
+                <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
+                   <svg className="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                    </svg>
                 </div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Interactive Preview</p>
+                <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Client Sandbox</p>
              </div>
              <ChatWidget />
           </div>
